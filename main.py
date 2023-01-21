@@ -2,6 +2,7 @@ import os
 import sys
 import pygame
 from random import randint
+from button import Button
 
 pygame.init()
 pygame.mixer.init()
@@ -77,31 +78,22 @@ def terminate():
 
 
 def start_screen():
-    intro_text = ["Играть",
-                  "Как играть?",
-                  "Выход"]
-
     text_game = ["Flying duck"]
 
     ok = True
 
     fon = load_image('fon.png')
     screen.blit(fon, (0, 0))
-    font1 = pygame.font.Font(None, 64)
-    text_coord = 220
-    for line in intro_text:
-        string_rendered = font1.render(line, True, pygame.Color('Red'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 320
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
 
-    font2 = pygame.font.Font('data/arial.ttf', 65)
+    button = Button(300, 100, (244, 244, 244), (115, 224, 255))
+    button.draw(325, 220, 'Играть', screen)
+    button.draw(290, 320, 'Как играть', screen)
+    button.draw(325, 420, 'Выход', screen)
+
+    font1 = pygame.font.Font('data/arial.ttf', 65)
     text_coord = 100
     for line in text_game:
-        string_rendered = font2.render(line, True, pygame.Color('Black'))
+        string_rendered = font1.render(line, True, pygame.Color('Black'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
@@ -113,15 +105,15 @@ def start_screen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = pygame.mouse.get_pos()
-                ok = False
-                if x > 323 and x < 581 and y > 290 and y < 320:
-                    what()
-                elif x > 322 and x < 472 and y > 343 and y < 379:
-                    terminate()
-                else:
-                    print('Игра началась')
+            act = button.mouse_click(325, 220, 'Играть', screen)
+            act1 = button.mouse_click(290, 320, 'Как играть', screen)
+            act2 = button.mouse_click(325, 420, 'Выход', screen)
+            if act == 1:
+                return
+            if act1 == 1:
+                what()
+            if act2 == 1:
+                terminate()
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -185,6 +177,8 @@ def write_record(r):
 
 def game_over(score):
     img = load_image('gameover.png')
+    text = font.render('Жизни: 0', 1, pygame.Color(0, 0, 0))
+    screen.blit(text, (WIDTH - 170, 10))
     screen.blit(img, (300, 150))
     r = read_record()
     font_game_over = pygame.font.Font('data/arial.ttf', 20)
@@ -335,7 +329,7 @@ while running:
     image = pygame.transform.rotate(image, -speed_d * 2)
     screen.blit(image, player)
 
-    if score >= 50 and score <= 70:  # замена персонажа при достижении очков
+    if score >= 50 and score <= 200:  # замена персонажа при достижении очков
         image_secret = player_image_secret.subsurface(34 * int(frame), 0, 34, 24)
         image_secret = pygame.transform.rotate(image_secret, -speed_d * 2)
         screen.blit(image_secret, player)
