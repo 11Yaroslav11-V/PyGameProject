@@ -41,7 +41,7 @@ lives = 3
 score = 0
 
 pygame.display.set_caption("flying duck")
-icon = pygame.image.load('data/icon.png')
+icon = pygame.image.load('data/icon_game.png')
 pygame.display.set_icon(icon)
 
 
