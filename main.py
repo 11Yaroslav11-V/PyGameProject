@@ -1,7 +1,7 @@
 import os
 import sys
 import pygame
-from random import randint
+import random
 from button import Button
 
 pygame.init()
@@ -32,6 +32,7 @@ pygame.mixer.music.play(-1)
 
 sound_die = pygame.mixer.Sound('data/die.wav')
 sound_hit = pygame.mixer.Sound('data/hit.wav')
+sound_win = pygame.mixer.Sound('data/win.wav')
 
 sound = True
 
@@ -52,6 +53,8 @@ player = pygame.Rect(WIDTH // 3, HEIGHT // 2, 34, 24)
 pipe = []
 background = []
 scores = []
+
+BUTTON = Button(205, 75)
 
 background.append(pygame.Rect(0, 0, 297, 600))
 
@@ -78,6 +81,7 @@ def terminate():
 
 
 def start_screen():
+    global volume, sound
     text_game = ["Flying duck"]
 
     ok = True
@@ -85,10 +89,10 @@ def start_screen():
     fon = load_image('fon.png')
     screen.blit(fon, (0, 0))
 
-    button = Button(300, 100, (244, 244, 244), (115, 224, 255))
-    button.draw(325, 220, 'Играть', screen)
-    button.draw(290, 320, 'Как играть', screen)
-    button.draw(325, 420, 'Выход', screen)
+    screen.blit(icon_game, (370, 10))
+    screen.blit(start_button, (165, 140))
+    screen.blit(options_button, (165, 240))
+    screen.blit(exit_button, (165, 340))
 
     font1 = pygame.font.Font('data/arial.ttf', 65)
     text_coord = 100
@@ -105,9 +109,24 @@ def start_screen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            act = button.mouse_click(325, 220, 'Играть', screen)
-            act1 = button.mouse_click(290, 320, 'Как играть', screen)
-            act2 = button.mouse_click(325, 420, 'Выход', screen)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m:
+                    sound = not sound
+                    if sound:
+                        pygame.mixer.music.pause()
+                    else:
+                        pygame.mixer.music.unpause()
+                if event.key == pygame.K_KP_MINUS:
+                    volume -= 0.1
+                    pygame.mixer.music.set_volume(volume)
+                if event.key == pygame.K_KP_PLUS:
+                    volume += 0.1
+                    pygame.mixer.music.set_volume(volume)
+
+            act = BUTTON.mouse_click(325, 220)
+            act1 = BUTTON.mouse_click(290, 320)
+            act2 = BUTTON.mouse_click(325, 420)
+
             if act == 1:
                 return
             if act1 == 1:
@@ -120,20 +139,30 @@ def start_screen():
 
 
 def what():
-    intro_text = ["Для прыжков используйте ЛКМ",
-                  "Назад"]
+    global sound
+    intro_text = ["Суть данной игры проста, набрать как можно больше очков.",
+                  "игра заканчивается при достижении 500 очков.",
+                  "У вас всего 3 жизни и они не восполняемы, ",
+                  "когда жизни заканчиваются, игра соответственно тоже.",
+                  "каждые 10 очков игра ускоряется и становится сложнее играть.",
+                  "",
+                  "",
+                  "В игре спрятанна пасхалка :)"]
 
     text = ["Вкл/Выкл музыку m,"
-            "уменьшить '-' увеличить '+' громкость"]
+            "уменьшить '-' увеличить '+' громкость",
+            "Для прыжков используйте ЛКМ"]
 
     ok = True
 
     fon = load_image('fon.png')
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 40)
-    text_coord = 245
+    screen.blit(back_button, (350, 350))
+
+    font = pygame.font.Font('data/arial.ttf', 18)
+    text_coord = 0
     for line in intro_text:
-        string_rendered = font.render(line, True, pygame.Color('Red'))
+        string_rendered = font.render(line, True, pygame.Color('Black'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
@@ -141,9 +170,9 @@ def what():
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
 
-    text_coord = 200
+    text_coord = 270
     for line in text:
-        string_rendered = font.render(line, True, pygame.Color('Red'))
+        string_rendered = font.render(line, True, pygame.Color('Black'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
@@ -155,9 +184,16 @@ def what():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m:
+                    sound = not sound
+                    if sound:
+                        pygame.mixer.music.pause()
+                    else:
+                        pygame.mixer.music.unpause()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
-                if x > 18 and x < 103 and y > 294 and y < 315:
+                if x > 370 and x < 463 and y > 371 and y < 415:
                     start_screen()
                     ok = False
 
@@ -176,25 +212,71 @@ def write_record(r):
 
 
 def game_over(score):
+    pygame.mixer.music.stop()
     img = load_image('gameover.png')
     text = font.render('Жизни: 0', 1, pygame.Color(0, 0, 0))
+
     screen.blit(text, (WIDTH - 170, 10))
     screen.blit(img, (300, 150))
+    screen.blit(end_button, (350, 350))
+
     r = read_record()
     font_game_over = pygame.font.Font('data/arial.ttf', 20)
     text = font_game_over.render(f'record: {r} score {score}', True, (0, 0, 0))
+
     screen.blit(text, (285, 330))
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                if x > 370 and x < 463 and y > 371 and y < 415:
+                    terminate()
         pygame.display.flip()
         clock.tick(FPS)
 
 
-player_image_secret = load_image('player_secret.png', -1)
+def win(score):
+    pygame.mixer.music.stop()
+    img = load_image('win.png')
+    text = font.render(f'Очки: {score}', 1, pygame.Color(0, 0, 0))
+
+    screen.blit(text, (10, 10))
+    screen.blit(img, (250, 180))
+    screen.blit(end_button, (350, 350))
+
+    r = read_record()
+    font_game_over = pygame.font.Font('data/arial.ttf', 20)
+    text = font_game_over.render(f'record: {r} score {score}', True, (0, 0, 0))
+
+    screen.blit(text, (285, 330))
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                if x > 370 and x < 463 and y > 371 and y < 415:
+                    terminate()
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 flappy_bird = load_image('flappy bird.png', -1)
 player_image = load_image('player.png', -1)
+player_image_secret = load_image('player_secret.png', -1)
+
+start_button = load_image('start_button.png')
+back_button = load_image('back.png')
+end_button = load_image('end_button.png')
+options_button = load_image('options_button.png')
+exit_button = load_image('exit_button.png')
+
+icon_game = load_image('icon_game.png')
+icon_game = pygame.transform.scale(icon_game, (128, 128))
+
 pipe_bot = load_image('pipe_bottom.png', -1)
 pipe_top = load_image('pipe_top.png', -1)
 
@@ -255,6 +337,11 @@ while running:
         position_d += (HEIGHT // 2 - position_d) * 0.1
         player.y = position_d
 
+    elif state == 'win':
+        sound_win.play()
+        write_record(score)
+        win(score)
+
     elif state == 'play':
         if click:
             boost_d = - 2
@@ -269,7 +356,7 @@ while running:
             pipe.append(pygame.Rect(WIDTH, 0, 52, pos_p - size_p // 2))
             pipe.append(pygame.Rect(WIDTH, pos_p + size_p // 2, 52, HEIGHT - pos_p + size_p // 2))
 
-            pos_p += randint(-100, 100)
+            pos_p += random.randint(-100, 100)
             if pos_p < size_p:
                 pos_p = size_p
             elif pos_p > HEIGHT - size_p:
@@ -298,7 +385,6 @@ while running:
             timer = 60
         else:
             state = 'game over'
-            pygame.mixer.music.stop()
             sound_die.play()
             if state == 'game over':
                 if score > int(record):
@@ -309,9 +395,6 @@ while running:
         position_d += speed_d
         speed_d = (speed_d + boost_d + 1) * 0.98
         player.y = position_d
-
-        if timer == 0:
-            running = False
 
     screen.fill((0, 0, 0))
     for bg in background:
@@ -329,21 +412,24 @@ while running:
     image = pygame.transform.rotate(image, -speed_d * 2)
     screen.blit(image, player)
 
-    if score >= 50 and score <= 200:  # замена персонажа при достижении очков
+    if score > 500:
+        state = 'win'
+
+    if score >= 50 and score <= 200:  # замена персонажа при достижении очков, так называемый рейдж мод
         image_secret = player_image_secret.subsurface(34 * int(frame), 0, 34, 24)
         image_secret = pygame.transform.rotate(image_secret, -speed_d * 2)
         screen.blit(image_secret, player)
 
-    if score >= 200 and score <= 300:  # пасхалка, отсылка на оригинальную версию flappy bird
+    if score >= 200:  # пасхалка, отсылка на оригинальную версию flappy bird
         flappy = flappy_bird.subsurface(34 * int(frame), 0, 34, 24)
         flappy = pygame.transform.rotate(flappy, -speed_d * 2)
         screen.blit(flappy, player)
 
-    text = font.render('Очки: ' + str(score), 1, pygame.Color(0, 0, 0))
-    screen.blit(text, (10, 10))
+    text2 = font.render('Очки: ' + str(score), 1, pygame.Color(0, 0, 0))
+    screen.blit(text2, (10, 10))
 
-    text = font.render('Жизни: ' + str(lives), 1, pygame.Color(0, 0, 0))
-    screen.blit(text, (WIDTH - 170, 10))
+    text1 = font.render('Жизни: ' + str(lives), 1, pygame.Color(0, 0, 0))
+    screen.blit(text1, (WIDTH - 170, 10))
 
     pygame.display.update()
     clock.tick(FPS)
