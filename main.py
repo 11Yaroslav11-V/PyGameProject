@@ -16,6 +16,7 @@ timer = 10
 frame = 0
 
 speed_d = 0
+x = 3
 boost_d = 0
 position_d = 0
 
@@ -124,7 +125,7 @@ def start_screen():
                     pygame.mixer.music.set_volume(volume)
 
             act = BUTTON.mouse_click(325, 220)
-            act1 = BUTTON.mouse_click(290, 320)
+            act1 = BUTTON.mouse_click(325, 320)
             act2 = BUTTON.mouse_click(325, 420)
 
             if act == 1:
@@ -147,7 +148,8 @@ def what():
                   "каждые 10 очков игра ускоряется и становится сложнее играть.",
                   "",
                   "",
-                  "В игре спрятанна пасхалка :)"]
+                  "В игре спрятанна пасхалка :)",
+                  "Кнопка complexity - выбрать уровень сложности!"]
 
     text = ["Вкл/Выкл музыку m,"
             "уменьшить '-' увеличить '+' громкость",
@@ -156,8 +158,11 @@ def what():
     ok = True
 
     fon = load_image('fon.png')
+    complexity_button = load_image('complexity.png')
+
     screen.blit(fon, (0, 0))
-    screen.blit(back_button, (350, 350))
+    screen.blit(back_button, (342, 430))
+    screen.blit(complexity_button, (140, 275))
 
     font = pygame.font.Font('data/arial.ttf', 18)
     text_coord = 0
@@ -193,12 +198,78 @@ def what():
                         pygame.mixer.music.unpause()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
-                if x > 370 and x < 463 and y > 371 and y < 415:
+                if x > 321 and x < 495 and y > 358 and y < 408:
+                    change_complexity()
+                    ok = False
+                if x > 362 and x < 456 and y > 450 and y < 496:
                     start_screen()
                     ok = False
 
         pygame.display.flip()
         clock.tick(FPS)
+
+
+def easy_lvl():
+    global x
+    x = 4
+
+
+def normal_lvl():
+    global x
+    x = 10
+
+
+def hard_lvl():
+    global x
+    x = 15
+
+
+def change_complexity():
+    text_game = ["Выбор сложности"]
+
+    ok = True
+
+    fon = load_image('fon.png')
+    easy = load_image('easy.png')
+    normal = load_image('normal.png')
+    hard = load_image('hard.png')
+    screen.blit(fon, (0, 0))
+    screen.blit(easy, (350, 150))
+    screen.blit(normal, (350, 240))
+    screen.blit(hard, (350, 340))
+
+    font1 = pygame.font.Font('data/arial.ttf', 38)
+    text_coord = 100
+    for line in text_game:
+        string_rendered = font1.render(line, True, pygame.Color('Black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 190
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while ok:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                if x > 371 and x < 463 and y > 168 and y < 217:
+                    easy_lvl()
+                    ok = False
+                    what()
+                if x > 371 and x < 463 and y > 260 and y < 304:
+                    normal_lvl()
+                    ok = False
+                    what()
+                if x > 371 and x < 463 and y > 361 and y < 407:
+                    hard_lvl()
+                    ok = False
+                    what()
+
+            pygame.display.flip()
+            clock.tick(FPS)
 
 
 def read_record():
@@ -310,7 +381,7 @@ while running:
         timer -= 1
 
     frame = (frame + 0.2) % 4
-    speed_p = 3 + score // 10
+    speed_p = x + score // 10  # скорость уточки усложняющаяся
 
     for i in range(len(background) - 1, -1, -1):
         bg = background[i]
@@ -344,7 +415,7 @@ while running:
 
     elif state == 'play':
         if click:
-            boost_d = - 2
+            boost_d = - 2  # управляемость
         else:
             boost_d = 0
 
