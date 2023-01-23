@@ -11,12 +11,12 @@ FPS = 60
 WIDTH = 900
 HEIGHT = 600
 
-state = 'start'
+state = 'start'  # игровые положения
 timer = 10
-frame = 0
+frame = 0  # для анимации
 
 speed_d = 0
-x = 3
+x = 3  # все что участвует в управление, пермещении и физике птички
 boost_d = 0
 position_d = 0
 
@@ -51,16 +51,16 @@ clock = pygame.time.Clock()
 
 player = pygame.Rect(WIDTH // 3, HEIGHT // 2, 34, 24)
 
-pipe = []
-background = []
-scores = []
+pipe = []  # список труб
+background = []  # задний фон для его прогрузки
+scores = []  # очки
 
 BUTTON = Button(205, 75)
 
-background.append(pygame.Rect(0, 0, 297, 600))
+background.append(pygame.Rect(0, 0, 297, 600))  # прогрузка фона
 
 
-def load_image(name, colorkey=None):
+def load_image(name, colorkey=None):  # загрузка изображений
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
@@ -76,12 +76,12 @@ def load_image(name, colorkey=None):
     return image
 
 
-def terminate():
+def terminate():   # выход
     pygame.quit()
     sys.exit()
 
 
-def start_screen():
+def start_screen():   # меню
     global volume, sound
     text_game = ["Flying duck"]
 
@@ -139,7 +139,7 @@ def start_screen():
         clock.tick(FPS)
 
 
-def what():
+def what():  # настройки
     global sound
     intro_text = ["Суть данной игры проста, набрать как можно больше очков.",
                   "игра заканчивается при достижении 500 очков.",
@@ -196,35 +196,35 @@ def what():
                         pygame.mixer.music.pause()
                     else:
                         pygame.mixer.music.unpause()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONUP:
                 x, y = pygame.mouse.get_pos()
                 if x > 321 and x < 495 and y > 358 and y < 408:
+                    ok = False
                     change_complexity()
-                    ok = False
                 if x > 362 and x < 456 and y > 450 and y < 496:
-                    start_screen()
                     ok = False
+                    start_screen()
 
         pygame.display.flip()
         clock.tick(FPS)
 
 
-def easy_lvl():
+def easy_lvl():  # меняется сложность
     global x
     x = 4
 
 
-def normal_lvl():
+def normal_lvl():   # меняется сложность
     global x
     x = 10
 
 
-def hard_lvl():
+def hard_lvl():   # меняется сложность
     global x
     x = 15
 
 
-def change_complexity():
+def change_complexity():   # меняется сложность меню
     text_game = ["Выбор сложности"]
 
     ok = True
@@ -253,36 +253,36 @@ def change_complexity():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONUP:
                 x, y = pygame.mouse.get_pos()
                 if x > 371 and x < 463 and y > 168 and y < 217:
-                    easy_lvl()
                     ok = False
+                    easy_lvl()
                     what()
                 if x > 371 and x < 463 and y > 260 and y < 304:
-                    normal_lvl()
                     ok = False
+                    normal_lvl()
                     what()
                 if x > 371 and x < 463 and y > 361 and y < 407:
-                    hard_lvl()
                     ok = False
+                    hard_lvl()
                     what()
 
             pygame.display.flip()
             clock.tick(FPS)
 
 
-def read_record():
+def read_record():  # запись рекорда
     with open('data/record.txt') as f:
         return f.readline()
 
 
-def write_record(r):
+def write_record(r):  # чтение рекорда
     with open('data/record.txt', 'w') as f:
         f.write(str(r))
 
 
-def game_over(score):
+def game_over(score):  # конец игры
     pygame.mixer.music.stop()
     img = load_image('gameover.png')
     text = font.render('Жизни: 0', 1, pygame.Color(0, 0, 0))
@@ -300,7 +300,7 @@ def game_over(score):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONUP:
                 x, y = pygame.mouse.get_pos()
                 if x > 370 and x < 463 and y > 371 and y < 415:
                     terminate()
@@ -308,7 +308,7 @@ def game_over(score):
         clock.tick(FPS)
 
 
-def win(score):
+def win(score):  # победа
     pygame.mixer.music.stop()
     img = load_image('win.png')
     text = font.render(f'Очки: {score}', 1, pygame.Color(0, 0, 0))
@@ -342,7 +342,7 @@ player_image_secret = load_image('player_secret.png', -1)
 start_button = load_image('start_button.png')
 back_button = load_image('back.png')
 end_button = load_image('end_button.png')
-options_button = load_image('options_button.png')
+options_button = load_image('options_button.png')  # подгрузка изображений
 exit_button = load_image('exit_button.png')
 
 icon_game = load_image('icon_game.png')
@@ -352,7 +352,7 @@ pipe_bot = load_image('pipe_bottom.png', -1)
 pipe_top = load_image('pipe_top.png', -1)
 
 
-start_screen()
+start_screen()  # основной игровой цикл
 fon_game = load_image('fon_game.png')
 running = True
 while running:
@@ -370,7 +370,7 @@ while running:
             if event.key == pygame.K_KP_MINUS:
                 volume -= 0.1
                 pygame.mixer.music.set_volume(volume)
-            if event.key == pygame.K_KP_PLUS:
+            if event.key == pygame.K_KP_PLUS:  # для раюоты с музыкой
                 volume += 0.1
                 pygame.mixer.music.set_volume(volume)
 
@@ -380,10 +380,10 @@ while running:
     if timer > 0:
         timer -= 1
 
-    frame = (frame + 0.2) % 4
+    frame = (frame + 0.2) % 4  # анимация
     speed_p = x + score // 10  # скорость уточки усложняющаяся
 
-    for i in range(len(background) - 1, -1, -1):
+    for i in range(len(background) - 1, -1, -1):  # фон
         bg = background[i]
         bg.x -= speed_p // 2
 
@@ -391,9 +391,9 @@ while running:
             background.remove(bg)
 
         if background[len(background) - 1].right <= WIDTH:
-            background.append(pygame.Rect(background[len(background) - 1].right, 0, 297, 600))
+            background.append(pygame.Rect(background[len(background) - 1].right, 0, 297, 600))   # прогрузка фона
 
-    for i in range(len(pipe) - 1, -1, -1):
+    for i in range(len(pipe) - 1, -1, -1):  # трубы
         elem = pipe[i]
         elem.x -= speed_p
 
@@ -405,10 +405,10 @@ while running:
     if state == 'start':
         if click and timer == 0 and len(pipe) == 0:
             state = 'play'
-        position_d += (HEIGHT // 2 - position_d) * 0.1
+        position_d += (HEIGHT // 2 - position_d) * 0.1  # начальная позиция птички
         player.y = position_d
 
-    elif state == 'win':
+    elif state == 'win':  # победа
         sound_win.play()
         write_record(score)
         win(score)
@@ -419,13 +419,13 @@ while running:
         else:
             boost_d = 0
 
-        position_d += speed_d
+        position_d += speed_d   # управление птичкой при клике
         speed_d = (speed_d + boost_d + 1) * 0.98
         player.y = position_d
 
         if len(pipe) == 0 or pipe[len(pipe) - 1].x < WIDTH - 200:
-            pipe.append(pygame.Rect(WIDTH, 0, 52, pos_p - size_p // 2))
-            pipe.append(pygame.Rect(WIDTH, pos_p + size_p // 2, 52, HEIGHT - pos_p + size_p // 2))
+            pipe.append(pygame.Rect(WIDTH, 0, 52, pos_p - size_p // 2))  # верх трубы
+            pipe.append(pygame.Rect(WIDTH, pos_p + size_p // 2, 52, HEIGHT - pos_p + size_p // 2))  # трубы низ
 
             pos_p += random.randint(-100, 100)
             if pos_p < size_p:
@@ -433,11 +433,11 @@ while running:
             elif pos_p > HEIGHT - size_p:
                 pos_p = HEIGHT - size_p
 
-        if player.top < 0 or player.bottom > HEIGHT:
+        if player.top < 0 or player.bottom > HEIGHT:  # удар об границу
             state = 'fall'
 
         for elem in pipe:
-            if player.colliderect(elem):
+            if player.colliderect(elem):  # удар с пайпом
                 state = 'fall'
 
             if elem.right < player.left and elem not in scores:
@@ -445,12 +445,12 @@ while running:
                 score += 1
 
     elif state == 'fall':
-        speed_d, boost_d = 0, 0
+        speed_d, boost_d = 0, 0  # убираем все значения, а связанно это с неприятным эффектом после удара
         pos_p = HEIGHT // 2
         if lives > 1:
             sound_hit.play()
 
-        lives -= 1
+        lives -= 1  # убираем жизнь
         if lives > 0:
             state = 'start'
             timer = 60
@@ -460,10 +460,10 @@ while running:
             if state == 'game over':
                 if score > int(record):
                     write_record(score)
-                game_over(score)
+                game_over(score)  # проигрыш
 
     else:
-        position_d += speed_d
+        position_d += speed_d  # управление птичкой при клике
         speed_d = (speed_d + boost_d + 1) * 0.98
         player.y = position_d
 
@@ -475,16 +475,16 @@ while running:
         if elem.y == 0:
             rect = pipe_top.get_rect(bottomleft=elem.bottomleft)
             screen.blit(pipe_top, rect)
-        else:
+        else:  # снова трубы
             rect = pipe_bot.get_rect(topleft=elem.topleft)
             screen.blit(pipe_bot, rect)
 
     image = player_image.subsurface(34 * int(frame), 0, 34, 24)
     image = pygame.transform.rotate(image, -speed_d * 2)
-    screen.blit(image, player)
+    screen.blit(image, player)  # текстура персонажа
 
     if score > 500:
-        state = 'win'
+        state = 'win'  # победа
 
     if score >= 50 and score <= 200:  # замена персонажа при достижении очков, так называемый рейдж мод
         image_secret = player_image_secret.subsurface(34 * int(frame), 0, 34, 24)
